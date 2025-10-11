@@ -13,7 +13,7 @@ class Sentinel2Classifier:
     """Wrapper for sklearn classifiers with easy model switching."""
 
     def __init__(self, classifier: BaseEstimator = None):
-        self.classifier = classifier or RandomForestClassifier(
+        self.classifier = classifier if classifier is not None else RandomForestClassifier(
             n_estimators=50, random_state=42
         )
 
