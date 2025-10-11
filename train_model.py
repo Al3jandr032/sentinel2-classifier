@@ -4,12 +4,16 @@
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 
+from src.sentinel2_classifier import get_logger, setup_logger
 from src.sentinel2_classifier.classifier import Sentinel2Classifier
 from src.sentinel2_classifier.data_loader import (
     create_sample_labels_from_index,
     load_sentinel2_image,
     prepare_features,
 )
+
+# Setup logging
+logger = setup_logger("train_model", level="INFO")
 
 
 def main():
@@ -18,14 +22,14 @@ def main():
 
     try:
         data, profile = load_sentinel2_image(image_path)
-        print(f"Loaded image with shape: {data.shape}")
+        logger.info(f"Loaded image with shape: {data.shape}")
 
         # Prepare features
         features = prepare_features(data)
 
         # Create labels from NDVI/NDWI indices
         labels = create_sample_labels_from_index(data)
-        print(f"Generated {len(np.unique(labels))} classes from indices")
+        logger.info(f"Generated {len(np.unique(labels))} classes from indices")
 
         # Initialize classifier (easily switchable)
         classifier = Sentinel2Classifier(
@@ -34,16 +38,16 @@ def main():
         # classifier = Sentinel2Classifier(SVC(kernel='rbf', random_state=42))  # Alternative
 
         # Train model
-        print("Training model...")
+        logger.info("Training model...")
         classifier.train(features, labels)
 
         # Save trained model
         classifier.save_model("trained_model.pkl")
-        print("Model saved to trained_model.pkl")
+        logger.info("Model saved to trained_model.pkl")
 
     except FileNotFoundError:
-        print("Please provide a valid Sentinel-2 image path in the script")
-        print("Demo completed - model structure is ready")
+        logger.warning("Please provide a valid Sentinel-2 image path in the script")
+        logger.info("Demo completed - model structure is ready")
 
 
 if __name__ == "__main__":

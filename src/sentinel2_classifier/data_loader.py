@@ -1,10 +1,13 @@
-from typing import Tuple
+from typing import Optional, Tuple
 
 import numpy as np
 import rasterio
 
 from .indices import calculate_indices_from_sentinel2
+from .logging_config import get_logger
 from .resampling import create_common_resolution_dataset, load_sentinel2_safe_folder
+
+logger = get_logger(__name__)
 
 
 def load_sentinel2_image(image_path: str) -> Tuple[np.ndarray, dict]:
@@ -16,25 +19,24 @@ def load_sentinel2_image(image_path: str) -> Tuple[np.ndarray, dict]:
 
 
 def load_sentinel2_multispectral(
-    safe_folder: str, target_resolution: int = 10, selected_bands: list = None
+    safe_folder: str,
+    target_resolution: int = 10,
+    selected_bands: list = None,
+    geojson_path: Optional[str] = None,
 ) -> Tuple[np.ndarray, dict, list]:
-    """Load and resample Sentinel-2 SAFE folder to common resolution."""
+    """Load and resample Sentinel-2 SAFE folder to common resolution, optionally crop with GeoJSON."""
+    # Define bands available at each resolution
+    resolution_bands = {
+        10: ["B02", "B03", "B04", "B08"],
+        20: ["B05", "B06", "B07", "B8A", "B11", "B12"],
+        60: ["B01", "B09", "B10"],
+    }
+
     if selected_bands is None:
-        selected_bands = [
-            "B02",
-            "B03",
-            "B04",
-            "B05",
-            "B06",
-            "B07",
-            "B08",
-            "B8A",
-            "B11",
-            "B12",
-        ]
+        selected_bands = resolution_bands[target_resolution]
 
     data, profile = load_sentinel2_safe_folder(
-        safe_folder, target_resolution, selected_bands
+        safe_folder, target_resolution, selected_bands, geojson_path
     )
     return data, profile, selected_bands
 

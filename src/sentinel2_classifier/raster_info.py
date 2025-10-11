@@ -1,5 +1,9 @@
 import rasterio
 
+from .logging_config import get_logger
+
+logger = get_logger(__name__)
+
 
 def get_raster_info(image_path: str) -> dict:
     """Get comprehensive raster information."""
@@ -19,10 +23,10 @@ def get_raster_info(image_path: str) -> dict:
 def print_raster_info(image_path: str) -> None:
     """Print formatted raster information."""
     info = get_raster_info(image_path)
-    print(f"File: {image_path}")
-    print(f"Bands: {info['bands']}")
-    print(f"Size: {info['width']} x {info['height']}")
-    print(f"Data type: {info['dtype']}")
-    print(f"CRS: {info['crs']}")
-    print(f"Bounds: {info['bounds']}")
-    print(f"NoData: {info['nodata']}")
+    logger.info(f"File: {image_path}")
+    logger.info(f"Bands: {info['bands']}")
+    logger.info(f"Size: {info['width']} x {info['height']}")
+    logger.info(f"Data type: {info['dtype']}")
+    logger.info(f"CRS: {info['crs']}")
+    logger.info(f"Bounds: {info['bounds']}")
+    logger.info(f"NoData: {info['nodata']}")

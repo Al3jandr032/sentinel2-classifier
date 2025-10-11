@@ -1,5 +1,9 @@
 import numpy as np
 
+from .logging_config import get_logger
+
+logger = get_logger(__name__)
+
 
 def calculate_ndvi(red_band: np.ndarray, nir_band: np.ndarray) -> np.ndarray:
     """Calculate NDVI: (NIR - Red) / (NIR + Red)"""
@@ -40,19 +44,26 @@ def calculate_indices_from_sentinel2(
             "B12",
         ]
 
+    logger.debug(f"Calculating indices with band order: {band_order}")
+
     # Find band indices
     try:
         green_idx = band_order.index("B03")  # Green
         red_idx = band_order.index("B04")  # Red
         nir_idx = band_order.index("B08")  # NIR
+        logger.debug(
+            f"Band indices - Green: {green_idx}, Red: {red_idx}, NIR: {nir_idx}"
+        )
     except ValueError:
         # Fallback to positional indexing if band names not found
         green_idx, red_idx, nir_idx = 1, 2, 3
+        logger.warning("Band names not found, using positional indexing")
 
     green = data[green_idx].astype(np.float32)
     red = data[red_idx].astype(np.float32)
     nir = data[nir_idx].astype(np.float32)
 
+    logger.info("Calculating NDVI and NDWI indices")
     ndvi = calculate_ndvi(red, nir)
     ndwi = calculate_ndwi(green, nir)
 

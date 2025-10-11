@@ -1,6 +1,10 @@
 import numpy as np
 import rasterio
 
+from .logging_config import get_logger
+
+logger = get_logger(__name__)
+
 
 def save_classified_raster(
     predictions: np.ndarray,
@@ -10,6 +14,7 @@ def save_classified_raster(
     width: int,
 ) -> None:
     """Save classification results as a GeoTIFF raster."""
+    logger.info(f"Saving classified raster to {output_path}")
     classified_image = predictions.reshape(height, width)
 
     profile = original_profile.copy()
@@ -17,6 +22,7 @@ def save_classified_raster(
 
     with rasterio.open(output_path, "w", **profile) as dst:
         dst.write(classified_image.astype("uint8"), 1)
+    logger.info("Classified raster saved successfully")
 
 
 def visualize_classification(
@@ -25,11 +31,13 @@ def visualize_classification(
     """Create a simple visualization of the classification."""
     import matplotlib.pyplot as plt
 
+    logger.info("Creating classification visualization")
     plt.figure(figsize=(10, 8))
     plt.imshow(classified_image, cmap="viridis")
     plt.colorbar(label="Land Cover Class")
     plt.title("Sentinel-2 Classification Results")
 
     if output_path:
+        logger.info(f"Saving visualization to {output_path}")
         plt.savefig(output_path, dpi=300, bbox_inches="tight")
     plt.show()

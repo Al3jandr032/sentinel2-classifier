@@ -3,12 +3,16 @@
 
 import sys
 
+from src.sentinel2_classifier import setup_logger
 from src.sentinel2_classifier.raster_info import print_raster_info
+
+# Setup logging
+logger = setup_logger("check_raster", level="INFO")
 
 
 def main():
     if len(sys.argv) != 2:
-        print("Usage: python check_raster.py <image_path>")
+        logger.error("Usage: python check_raster.py <image_path>")
         sys.exit(1)
 
     image_path = sys.argv[1]
@@ -16,7 +20,7 @@ def main():
     try:
         print_raster_info(image_path)
     except Exception as e:
-        print(f"Error reading raster: {e}")
+        logger.error(f"Error reading raster: {e}")
 
 
 if __name__ == "__main__":
