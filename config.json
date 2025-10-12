@@ -1,0 +1,6 @@
+{
+  "safe_folder": "/home/al3x/Downloads/S2C_MSIL2A_20250813T165911_N0511_R069_T14QMG_20250813T231612.SAFE",
+  "geojson_path": "data/cdmx.json",
+  "target_resolution": 20,
+  "selected_bands": ["B03", "B04", "B8A"]
+}

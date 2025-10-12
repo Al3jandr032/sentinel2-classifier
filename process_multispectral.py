@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Process full Sentinel-2 multispectral SAFE folder."""
 
+import json
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 
@@ -18,25 +19,19 @@ from src.sentinel2_classifier import (
 logger = setup_logger("process_multispectral", level="INFO")
 
 
-def main():
-    # Path to Sentinel-2 SAFE folder
-    safe_folder = "/path/to/S2C_MSIL2A_20250813T165911_N0511_R069_T14QMG_20250813T231612.SAFE"  # Replace with actual path
+def load_config(config_path="config.json"):
+    """Load configuration from JSON file."""
+    with open(config_path) as f:
+        return json.load(f)
 
-    # Processing parameters
-    geoJson = "data/cdmx.json"
-    target_resolution = 20  # 10m, 20m, or 60m
-    selected_bands = [
-        # "B02",
-        "B03",
-        "B04",
-        # "B05",
-        # "B06",
-        # "B07",
-        # "B08",
-        "B8A",
-        # "B11",
-        # "B12",
-    ]
+
+def main():
+    # Load configuration
+    config = load_config()
+    safe_folder = config["safe_folder"]
+    geoJson = config["geojson_path"]
+    target_resolution = config["target_resolution"]
+    selected_bands = config["selected_bands"]
 
     try:
         logger.info("Loading and resampling Sentinel-2 multispectral data...")
