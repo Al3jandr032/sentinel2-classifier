@@ -27,9 +27,40 @@ def load_sentinel2_multispectral(
     """Load and resample Sentinel-2 SAFE folder to common resolution, optionally crop with GeoJSON."""
     # Define bands available at each resolution
     resolution_bands = {
-        10: ["B02", "B03", "B04", "B08"],
-        20: ["B05", "B06", "B07", "B8A", "B11", "B12"],
-        60: ["B01", "B09", "B10"],
+        10: ["AOT", "B02", "B03", "B04", "B08", "TCI", "WVP"],
+        20: [
+            "AOT",
+            "B01",
+            "B02",
+            "B03",
+            "B04",
+            "B05",
+            "B06",
+            "B07",
+            "B11",
+            "B12",
+            "B8A",
+            "SCL",
+            "TCI",
+            "WVP",
+        ],
+        60: [
+            "AOT",
+            "B01",
+            "B02",
+            "B03",
+            "B04",
+            "B05",
+            "B06",
+            "B07",
+            "B09",
+            "B11",
+            "B12",
+            "B8A",
+            "SCL",
+            "TCI",
+            "WVP",
+        ],
     }
 
     if selected_bands is None:

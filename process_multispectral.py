@@ -24,18 +24,18 @@ def main():
 
     # Processing parameters
     geoJson = "data/cdmx.json"
-    target_resolution = 10  # 10m, 20m, or 60m
+    target_resolution = 20  # 10m, 20m, or 60m
     selected_bands = [
-        "B02",
+        # "B02",
         "B03",
         "B04",
-        "B05",
-        "B06",
-        "B07",
-        "B08",
+        # "B05",
+        # "B06",
+        # "B07",
+        # "B08",
         "B8A",
-        "B11",
-        "B12",
+        # "B11",
+        # "B12",
     ]
 
     try:

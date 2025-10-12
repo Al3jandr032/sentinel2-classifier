@@ -50,7 +50,10 @@ def calculate_indices_from_sentinel2(
     try:
         green_idx = band_order.index("B03")  # Green
         red_idx = band_order.index("B04")  # Red
-        nir_idx = band_order.index("B08")  # NIR
+        if "B08" in band_order:
+            nir_idx = band_order.index("B08")  # NIR
+        elif "B8A" in band_order:
+            nir_idx = band_order.index("B8A")  # NIR
         logger.debug(
             f"Band indices - Green: {green_idx}, Red: {red_idx}, NIR: {nir_idx}"
         )
@@ -58,7 +61,7 @@ def calculate_indices_from_sentinel2(
         # Fallback to positional indexing if band names not found
         green_idx, red_idx, nir_idx = 1, 2, 3
         logger.warning("Band names not found, using positional indexing")
-
+    print(data.shape)
     green = data[green_idx].astype(np.float32)
     red = data[red_idx].astype(np.float32)
     nir = data[nir_idx].astype(np.float32)

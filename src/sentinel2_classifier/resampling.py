@@ -12,6 +12,95 @@ from .logging_config import get_logger
 
 logger = get_logger(__name__)
 
+# ----------------------------------------------------------------------
+# 1️⃣  Band → native resolution (meters)
+# ----------------------------------------------------------------------
+band_resolutions = {
+    "B01": 60,
+    "B02": 10,
+    "B03": 10,
+    "B04": 10,
+    "B05": 20,
+    "B06": 20,
+    "B07": 20,
+    "B08": 10,
+    "B8A": 20,
+    "B09": 60,
+    "B10": 60,
+    "B11": 20,
+    "B12": 20,
+}
+
+# ----------------------------------------------------------------------
+# 2️⃣  Resolution → list of bands (including auxiliary products)
+# ----------------------------------------------------------------------
+resolution_bands = {
+    10: ["AOT", "B02", "B03", "B04", "B08", "TCI", "WVP"],
+    20: [
+        "AOT",
+        "B01",
+        "B02",
+        "B03",
+        "B04",
+        "B05",
+        "B06",
+        "B07",
+        "B11",
+        "B12",
+        "B8A",
+        "SCL",
+        "TCI",
+        "WVP",
+    ],
+    60: [
+        "AOT",
+        "B01",
+        "B02",
+        "B03",
+        "B04",
+        "B05",
+        "B06",
+        "B07",
+        "B09",
+        "B11",
+        "B12",
+        "B8A",
+        "SCL",
+        "TCI",
+        "WVP",
+    ],
+}
+
+
+# ----------------------------------------------------------------------
+# 3️⃣  Helper to get the native resolution of a band
+# ----------------------------------------------------------------------
+def get_band_resolution(band: str) -> int | None:
+    """Return the native resolution (m) for *band* or None if unknown."""
+    return band_resolutions.get(band)
+
+
+# ----------------------------------------------------------------------
+# 4️⃣  Helper to get all bands available at a given resolution
+# ----------------------------------------------------------------------
+def get_bands_for_resolution(resolution: int) -> list[str]:
+    """Return a list of band identifiers that exist at *resolution* meters."""
+    return resolution_bands.get(resolution, [])
+
+
+# ----------------------------------------------------------------------
+# 5️⃣  Filtering the paths dictionary for a target resolution
+# ----------------------------------------------------------------------
+def filter_paths_by_resolution(
+    band_paths: dict[str, str], target_resolution: int
+) -> dict[str, str]:
+    """
+    Return a new dict containing only those entries from *band_paths*
+    whose band is available at *target_resolution*.
+    """
+    allowed_bands = set(get_bands_for_resolution(target_resolution))
+    return {band: path for band, path in band_paths.items() if band in allowed_bands}
+
 
 def resample_sentinel2_bands(
     band_paths: Dict[str, str],
@@ -20,29 +109,8 @@ def resample_sentinel2_bands(
 ) -> Tuple[np.ndarray, dict]:
     """Load bands at target resolution only (no resampling for now)."""
 
-    # Sentinel-2 band resolutions
-    band_resolutions = {
-        "B01": 60,
-        "B02": 10,
-        "B03": 10,
-        "B04": 10,
-        "B05": 20,
-        "B06": 20,
-        "B07": 20,
-        "B08": 10,
-        "B8A": 20,
-        "B09": 60,
-        "B10": 60,
-        "B11": 20,
-        "B12": 20,
-    }
-
     # Filter bands to only those at target resolution
-    target_bands = {
-        band: path
-        for band, path in band_paths.items()
-        if band_resolutions.get(band) == target_resolution
-    }
+    target_bands = filter_paths_by_resolution(band_paths, target_resolution)
 
     if not target_bands:
         raise ValueError(f"No bands found at {target_resolution}m resolution")
@@ -90,18 +158,49 @@ def load_sentinel2_safe_folder(
 
     # Define bands available at each resolution
     resolution_bands = {
-        10: ["B02", "B03", "B04", "B08"],
-        20: ["B05", "B06", "B07", "B8A", "B11", "B12"],
-        60: ["B01", "B09", "B10"],
+        10: ["AOT", "B02", "B03", "B04", "B08", "TCI", "WVP"],
+        20: [
+            "AOT",
+            "B01",
+            "B02",
+            "B03",
+            "B04",
+            "B05",
+            "B06",
+            "B07",
+            "B11",
+            "B12",
+            "B8A",
+            "SCL",
+            "TCI",
+            "WVP",
+        ],
+        60: [
+            "AOT",
+            "B01",
+            "B02",
+            "B03",
+            "B04",
+            "B05",
+            "B06",
+            "B07",
+            "B09",
+            "B11",
+            "B12",
+            "B8A",
+            "SCL",
+            "TCI",
+            "WVP",
+        ],
     }
-
+    print(selected_bands)
     if selected_bands is None:
         selected_bands = resolution_bands[target_resolution]
     else:
         # Filter selected bands to only those available at target resolution
         available_bands = resolution_bands[target_resolution]
         selected_bands = [band for band in selected_bands if band in available_bands]
-
+    print(selected_bands)
     # Find band files in SAFE folder
     safe_path = Path(safe_folder)
     img_folder = (
@@ -117,8 +216,11 @@ def load_sentinel2_safe_folder(
 
         if res_path.exists():
             for band_file in res_path.glob("*.jp2"):
+                print(f"{band_file.name}")
                 for band in selected_bands:
+                    print(f"_{band}_  <=> {band_file.name}")
                     if f"_{band}_" in band_file.name:
+                        print("Valid")
                         band_paths[band] = str(band_file)
                         break
     else:  # L1C
